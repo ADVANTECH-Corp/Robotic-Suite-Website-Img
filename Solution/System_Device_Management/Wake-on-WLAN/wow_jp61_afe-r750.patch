@@ -1,0 +1,58 @@
+--- kernel/kernel/kernel-jammy-src/drivers/soc/tegra/pmc.c	2026-04-01 18:05:03.039692738 +0800
++++ kernel/kernel/kernel-jammy-src/drivers/soc/tegra/pmc.c	2026-04-01 18:12:43.490776545 +0800
+@@ -4424,6 +4424,7 @@
+ 	TEGRA_WAKE_GPIO("sd_wake", 8, 0, TEGRA234_MAIN_GPIO(G, 7)),
+ 	TEGRA_WAKE_GPIO("eqos", 20, 0, TEGRA234_MAIN_GPIO(G, 4)),
+ 	TEGRA_WAKE_GPIO("mgbe", 56, 0, TEGRA234_MAIN_GPIO(Y, 3)),
++        TEGRA_WAKE_GPIO("wifi", 1, 0, TEGRA234_MAIN_GPIO(L, 2)),
+ 	TEGRA_WAKE_IRQ("usb3_port_0", 76, 167),
+ 	TEGRA_WAKE_IRQ("usb3_port_1", 77, 167),
+ 	TEGRA_WAKE_IRQ("usb3_port_2_3", 78, 167),
+--- Linux_for_Tegra/bootloader/generic/BCT/tegra234-mb1-bct-pinmux-p3701-0000-a04.dtsi	2026-04-01 18:05:36.746845564 +0800
++++ Linux_for_Tegra/bootloader/generic/BCT/tegra234-mb1-bct-pinmux-p3701-0000-a04.dtsi	2026-04-01 18:13:00.231852017 +0800
+@@ -1542,10 +1542,10 @@
+ 			pex_wake_n_pl2 {
+ 				nvidia,pins = "pex_wake_n_pl2";
+ 				nvidia,function = "rsvd0";
+-				nvidia,pull = <TEGRA_PIN_PULL_NONE>;
++				nvidia,pull = <TEGRA_PIN_PULL_UP>;
+ 				nvidia,tristate = <TEGRA_PIN_ENABLE>;
+ 				nvidia,enable-input = <TEGRA_PIN_ENABLE>;
+-				nvidia,io-high-voltage = <TEGRA_PIN_ENABLE>;
++				nvidia,io-high-voltage = <TEGRA_PIN_DISABLE>;
+ 				nvidia,lpdr = <TEGRA_PIN_DISABLE>;
+ 			};
+ 
+--- kernel/hardware/nvidia/t23x/nv-public/tegra234-p3737-0000+p3701-0000.dts	2026-04-01 18:04:58.646672819 +0800
++++ kernel/hardware/nvidia/t23x/nv-public/tegra234-p3737-0000+p3701-0000.dts	2026-04-01 18:13:21.129946223 +0800
+@@ -219,6 +219,15 @@
+ 			wakeup-source;
+ 		};
+ 
++                key-wake {
++                        label = "pex-wake-gpios";
++                        gpios = <&gpio TEGRA234_MAIN_GPIO(L, 2) GPIO_ACTIVE_LOW>;
++                        linux,input-type = <EV_KEY>;
++                        linux,code = <KEY_WAKEUP>;
++                        wakeup-event-action = <EV_ACT_ASSERTED>;
++                        wakeup-source;
++                };
++
+ 		key-suspend {
+ 			label = "Suspend";
+ 			gpios = <&gpio TEGRA234_MAIN_GPIO(G, 2) GPIO_ACTIVE_LOW>;
+--- kernel/hardware/nvidia/t23x/nv-public/nv-platform/tegra234-p3737-0000+p3701-xxxx-nv-common.dtsi	2026-04-01 18:04:58.641672797 +0800
++++ kernel/hardware/nvidia/t23x/nv-public/nv-platform/tegra234-p3737-0000+p3701-xxxx-nv-common.dtsi	2026-04-01 18:14:06.443150504 +0800
+@@ -317,6 +317,12 @@
+ 							TEGRA234_MAIN_GPIO(Q, 4)
+ 							GPIO_ACTIVE_HIGH>;
+ 		};
++
++                pcie@14180000 {
++                        nvidia,pex-wake-gpios = <&gpio
++                                                        TEGRA234_MAIN_GPIO(L, 2)
++                                                        GPIO_ACTIVE_LOW>;
++                };
+ 	};
+ 
+ 	tegra-hsp@b950000 {
